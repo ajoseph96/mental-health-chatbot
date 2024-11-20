@@ -33,7 +33,7 @@ const MusicPlayer: React.FC = () => {
     }
   };
 
-  const handleVolumeChange = (event: Event, newValue: number | number[]) => {
+  const handleVolumeChange = (_event: Event, newValue: number | number[]) => {
     if (typeof newValue === 'number') {
       setVolume(newValue / 100);
     }
