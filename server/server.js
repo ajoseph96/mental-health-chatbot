@@ -14,10 +14,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the Mental Health Chatbot API!');
+});
+
+app.use( cors({
+  origin: 'http://localhost:5173', // Allow requests from Vite dev server
+}));
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'public')));
+//app.use(express.static(path.join(__dirname, 'public')));
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
