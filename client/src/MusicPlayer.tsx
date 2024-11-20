@@ -45,7 +45,7 @@ const MusicPlayer: React.FC = () => {
       <Button
         onClick={togglePlay}
         variant="contained"
-        color="primary" // Use secondary color
+        color="primary" 
         startIcon={isPlaying ? <VolumeOff /> : <VolumeUp />}
       >
         {isPlaying ? 'Stop Music' : 'Play Music'}
@@ -58,7 +58,7 @@ const MusicPlayer: React.FC = () => {
             aria-labelledby="volume-slider"
             min={0}
             max={100}
-            color="primary" // Use secondary color
+            color="primary" 
           />
         </Box>
       )}

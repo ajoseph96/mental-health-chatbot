@@ -12,7 +12,6 @@ const ChatBox: React.FC = () => {
   const [userMessage, setUserMessage] = useState<string>('');
 
   useEffect(() => {
-    // Add a welcome message when the component mounts
     setMessages([
       {
         sender: 'bot',
@@ -25,7 +24,6 @@ const ChatBox: React.FC = () => {
     event.preventDefault();
     if (userMessage.trim() === '') return;
 
-    // Display user's message
     setMessages((prevMessages) => [
       ...prevMessages,
       { sender: 'user', text: userMessage },
