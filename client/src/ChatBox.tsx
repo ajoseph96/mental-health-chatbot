@@ -84,7 +84,7 @@ const ChatBox: React.FC = () => {
       <Avatar
       variant="rounded"
       alt="Chatbot Icon"
-      src="/public/logo.svg"
+      src="/logo.svg"
       imgProps={{ style: { objectFit: 'contain' } }}
       sx={{ width: 30, height: 30, marginRight: 1 }}
     />
