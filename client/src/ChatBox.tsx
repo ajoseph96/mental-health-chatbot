@@ -34,7 +34,7 @@ const ChatBox: React.FC = () => {
 
     // Send message to server
     try {
-      const response = await fetch('http://localhost:5002/chat', {
+      const response = await fetch('https://mental-health-chatbot-hnn9.onrender.com/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: messageToSend }),
