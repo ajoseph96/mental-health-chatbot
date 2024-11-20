@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 });
 
 app.use( cors({
-  origin: ['https://mental-health-chatbot-project.netlify.app/', 'http://localhost:5173'], 
+  origin: ['https://mental-health-chatbot-project.netlify.app', 'http://localhost:5173'], 
 }));
 app.use(express.json());
 
