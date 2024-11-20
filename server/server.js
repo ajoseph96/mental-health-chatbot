@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 });
 
 app.use( cors({
-  origin: 'http://localhost:5173', // Allow requests from Vite dev server
+  origin: ['https://mental-health-chatbot-project.netlify.app/', 'http://localhost:5173'], 
 }));
 app.use(express.json());
 
