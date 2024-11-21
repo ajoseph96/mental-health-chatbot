@@ -82,7 +82,6 @@ Guidelines:
         { role: 'user', content: userMessage },
       ],
       temperature: 0.6,
-      max_tokens: 300,
     });
 
     const assistantMessage = response.choices[0].message.content.trim();
