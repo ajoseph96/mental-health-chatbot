@@ -52,7 +52,7 @@ app.post('/chat', async (req, res) => {
   if (isSelfHarmContent(userMessage)) {
     res.json({
       reply:
-        "I'm sorry to hear that you're feeling this way. Please consider reaching out to a mental health professional or someone you trust for support. You will get through this, I believe in you. Dial 988 for Ontario's suicide hotline",
+        "I'm so sorry to hear that you're feeling this way. Please consider reaching out to a mental health professional or someone you trust for support. You will get through this, I believe in you. Dial 988 for Ontario's suicide hotline. You deserve to be here and see everything life can offer you. Things will get better, I promise.",
     });
     return;
   }

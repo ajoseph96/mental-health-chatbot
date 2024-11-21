@@ -66,21 +66,23 @@ const ChatBox: React.FC = () => {
     elevation={3}
     sx={{
       padding: 2,
-      marginTop: 4,
-      width: '100%',
+      marginTop: 1,
+      width: '100%', // Full width of the Grid item
+      maxWidth: '700px', // Optional: Limit maximum width
       boxSizing: 'border-box',
-    }}
-  >
-
-<Box
-     sx={{
-      display: 'flex',
       alignItems: 'center',
-       justifyContent: 'center',
-      marginBottom: 2,
-      flexDirection: { xs: 'column', sm: 'row' },
+      justifyContent: 'center',
     }}
   >
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 1,
+        flexDirection: { xs: 'column', sm: 'row' },
+      }}
+    >
       <Avatar
       variant="rounded"
       alt="Chatbot Icon"
