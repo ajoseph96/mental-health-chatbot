@@ -47,23 +47,24 @@ function isSelfHarmContent(message) {
 
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
+  console.log('Received message from user:', userMessage);
 
   if (isSelfHarmContent(userMessage)) {
     res.json({
       reply:
-        "I'm sorry to hear that you're feeling this way. Please consider reaching out to a mental health professional or someone you trust for support.",
+        "I'm sorry to hear that you're feeling this way. Please consider reaching out to a mental health professional or someone you trust for support. You will get through this, I believe in you. Dial 988 for Ontario's suicide hotline",
     });
     return;
   }
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4', // Use 'gpt-3.5-turbo' if necessary
+      model: 'chatgpt-4o-latest', // Use 'gpt-3.5-turbo' if necessary
       messages: [
         {
           role: 'system',
           content: `
-You are "Someone Who Cares," a compassionate and supportive virtual assistant specializing in mental well-being.
+You are "Someone Who Cares About You" a compassionate and supportive virtual assistant specializing in mental well-being.
 
 Your goals are:
 - To provide empathetic, comforting, and non-judgmental support to users expressing feelings of sadness or mild distress.
@@ -85,6 +86,7 @@ Guidelines:
     });
 
     const assistantMessage = response.choices[0].message.content.trim();
+    console.log('Assistant response:', assistantMessage);
     res.json({ reply: assistantMessage });
   } catch (error) {
     console.error('Error communicating with OpenAI API:', error);
