@@ -31,25 +31,66 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+function isSelfHarmContent(message) {
+  const selfHarmIndicators = [
+    'suicide',
+    'kill myself',
+    'end my life',
+    'want to die',
+    'hurt myself',
+    'self-harm',
+  ];
+  return selfHarmIndicators.some((phrase) =>
+    message.toLowerCase().includes(phrase)
+  );
+}
+
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
-  console.log('Received message from user:', userMessage);
+
+  if (isSelfHarmContent(userMessage)) {
+    res.json({
+      reply:
+        "I'm sorry to hear that you're feeling this way. Please consider reaching out to a mental health professional or someone you trust for support.",
+    });
+    return;
+  }
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [{ role: 'user', content: userMessage }],
+      model: 'gpt-4', // Use 'gpt-3.5-turbo' if necessary
+      messages: [
+        {
+          role: 'system',
+          content: `
+You are "Someone Who Cares," a compassionate and supportive virtual assistant specializing in mental well-being.
+
+Your goals are:
+- To provide empathetic, comforting, and non-judgmental support to users expressing feelings of sadness or mild distress.
+- To offer general suggestions for coping strategies, such as deep breathing exercises, mindfulness, and encouraging positive activities.
+- To **encourage users to seek professional help** if they express severe distress or mention self-harm.
+
+Guidelines:
+- **Avoid** using phrases like "I'm unable to help" or "I can't provide assistance."
+- **Do not** mention that you are an AI language model or reference any policies.
+- **Refrain** from providing any medical advice or making diagnoses.
+- **Keep responses concise**, compassionate, and focused on supporting the user's emotional well-being.
+- **Include a gentle disclaimer** when appropriate, such as "While I'm not a substitute for professional help, I'm here to listen and offer support."
+`,
+        },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: 0.6,
+      max_tokens: 150,
     });
 
-    const assistantMessage = response.choices[0].message.content;
-    console.log('Assistant response:', assistantMessage);
+    const assistantMessage = response.choices[0].message.content.trim();
     res.json({ reply: assistantMessage });
   } catch (error) {
-    console.error(
-      'Error communicating with OpenAI API:',
-      error.response ? error.response.data : error.message
-    );
-    res.status(500).send('Error communicating with ChatGPT API');
+    console.error('Error communicating with OpenAI API:', error);
+    res
+      .status(500)
+      .send('There was an issue processing your message. Please try again later.');
   }
 });
 
