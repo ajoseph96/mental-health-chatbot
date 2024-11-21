@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 dotenv.config();
 
 import OpenAI from 'openai';
+import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,7 +37,7 @@ app.post('/chat', async (req, res) => {
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4',
       messages: [{ role: 'user', content: userMessage }],
     });
 
@@ -59,7 +60,7 @@ app.listen(PORT, () => {
 });
 
 const url = `https://mental-health-chatbot-hnn9.onrender.com`; 
-const interval = 30000; 
+const interval = (30000); 
 
 function reloadWebsite() {
   axios.get(url)
