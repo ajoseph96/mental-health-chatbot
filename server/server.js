@@ -60,7 +60,7 @@ app.listen(PORT, () => {
 });
 
 const url = `https://mental-health-chatbot-hnn9.onrender.com`; 
-const interval = (30000); 
+const interval = (14*60*1000); 
 
 function reloadWebsite() {
   axios.get(url)
