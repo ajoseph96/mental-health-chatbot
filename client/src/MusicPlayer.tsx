@@ -1,6 +1,4 @@
-// src/MusicPlayer.tsx
 
-// src/MusicPlayer.tsx
 
 import React, { useRef, useState, useEffect } from 'react';
 import { Button, Slider, Box } from '@mui/material';

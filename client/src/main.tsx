@@ -3,9 +3,6 @@
 import './index.css'
 import App from './App.tsx'
 
-// src/main.tsx or src/index.tsx
-
-// src/main.tsx
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';

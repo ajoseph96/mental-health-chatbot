@@ -1,6 +1,6 @@
-// src/ChatBox.tsx
-import React, { useState, useEffect } from 'react';
-import { Avatar, Paper, TextField, Button, Typography, Box } from '@mui/material';
+
+import React, { useState, useEffect,  useRef } from 'react';
+import { Avatar, Paper, TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -10,15 +10,47 @@ interface Message {
 const ChatBox: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [userMessage, setUserMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMessages([
-      {
-        sender: 'bot',
-        text: 'Hello! I am here to provide information on resources regarding your mental health. Deep breaths, I am here for you and we will get through this. How can I help?',
-      },
-    ]);
+    const fetchConversation = async () => {
+      try {
+        const response = await fetch('https://mental-health-chatbot-hnn9.onrender.com/history', {
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          throw new Error(`Error fetching history: ${response.status}`);
+        }
+        const data = await response.json();
+        const conversation = data.conversation.map(
+          (message: { role: string; content: string }) => ({
+            sender: message.role === 'user' ? 'user' : 'bot',
+            text: message.content,
+          })
+        );
+  
+        if (conversation.length > 0) {
+          setMessages(conversation);
+        } else {
+          setMessages([
+            {
+              sender: 'bot',
+              text: 'Hello! I am here to provide information on resources regarding your mental health. Deep breaths, I am here for you and we will get through this. How can I help?',
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching conversation history:', error);
+      }
+    };
+  
+    fetchConversation();
   }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]); 
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -31,12 +63,14 @@ const ChatBox: React.FC = () => {
 
     const messageToSend = userMessage;
     setUserMessage('');
+    setIsLoading(true);
 
     // Send message to server
     try {
       const response = await fetch('https://mental-health-chatbot-hnn9.onrender.com/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ message: messageToSend }),
       });
 
@@ -58,6 +92,8 @@ const ChatBox: React.FC = () => {
           text: 'Sorry, there was an error processing your request.',
         },
       ]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -67,8 +103,8 @@ const ChatBox: React.FC = () => {
     sx={{
       padding: 2,
       marginTop: 1,
-      width: '100%', // Full width of the Grid item
-      maxWidth: '700px', // Optional: Limit maximum width
+      width: '100%', 
+      maxWidth: '700px', 
       boxSizing: 'border-box',
       alignItems: 'center',
       justifyContent: 'center',
@@ -127,6 +163,12 @@ const ChatBox: React.FC = () => {
             </Box>
           </Box>
         ))}
+           {isLoading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+            <CircularProgress size={24} />
+          </Box>
+        )}
+        <div ref={messagesEndRef} />
       </Box>
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', mt: 2 }}>
         <TextField
