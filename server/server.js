@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 });
 
 app.use( cors({
-  origin: ['https://mental-health-chatbot-project.netlify.app', 'http://localhost:5173', ''],
+  origin: ['https://mental-health-chatbot-project.netlify.app', 'http://localhost:5173', 'https://mentalwellnessbot.help'],
   credentials: true, 
   })
 );
@@ -56,6 +56,7 @@ app.use(
       httpOnly: true, 
       sameSite: 'none', // REMEMBER TO: change to none if deployed 
       maxAge: 1000 * 60 * 60, // 1 hour
+      domain: 'https://mentalwellnessbot.help',
     },
   })
 );
@@ -161,7 +162,7 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-const url = `https://mental-health-chatbot-hnn9.onrender.com`; 
+const url = `https://api.mentalwellnessbot.help`; 
 const interval = (14*60*1000); 
 
 function reloadWebsite() {

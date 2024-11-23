@@ -16,7 +16,7 @@ const ChatBox: React.FC = () => {
   useEffect(() => {
     const fetchConversation = async () => {
       try {
-        const response = await fetch('http://localhost:5002/history', {
+        const response = await fetch('https://api.mentalwellnessbot.help/history', {
           credentials: 'include',
         });
         if (!response.ok) {
@@ -67,7 +67,7 @@ const ChatBox: React.FC = () => {
 
     // Send message to server
     try {
-      const response = await fetch('http://localhost:5002/chat', {
+      const response = await fetch('https://api.mentalwellnessbot.help/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
