@@ -1,6 +1,0 @@
-[[headers]]
-for = "/*"
-[headers.values]
-Content-Security-Policy = "script-src 'self' 'unsafe-inline' https://mental-health-chatbot-hnn9.onrender.com"
-Access-Control-Allow-Origin = "https://mental-health-chatbot-hnn9.onrender.com"
-Access-Control-Allow-Credentials = "true"
