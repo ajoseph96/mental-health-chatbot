@@ -55,7 +55,7 @@ app.use(
       secure: true, // REMEMBER TO: Set to true if using HTTPS/deploying
       httpOnly: true, 
       sameSite: 'none', // REMEMBER TO: change to none if deployed 
-      maxAge: 1000 * 60 * 60, // 1 hour
+      //maxAge: 1000 * 60 * 60, // 1 hour
       domain: 'https://mentalwellnessbot.help',
     },
   })
@@ -137,7 +137,7 @@ app.post('/chat', async (req, res) => {
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'chatgpt-4o-latest', 
+      model: 'gpt-5', 
       messages:
         req.session.conversation,
       temperature: 0.6,
