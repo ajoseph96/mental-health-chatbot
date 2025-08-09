@@ -47,7 +47,6 @@ const openai = new OpenAI({
 
 app.use(
   session({
-    store: MongoStore,
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -56,7 +55,7 @@ app.use(
       httpOnly: true, 
       sameSite: 'none', // REMEMBER TO: change to none if deployed 
       //maxAge: 1000 * 60 * 60, // 1 hour
-      domain: 'https://mentalwellnessbot.help',
+      domain: 'mentalwellnessbot.help',
     },
   })
 );
