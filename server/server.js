@@ -140,7 +140,7 @@ app.post('/chat', async (req, res) => {
       model: 'gpt-5', 
       messages:
         req.session.conversation,
-      temperature: 0.6,
+      temperature: 0.0.8,
     });
 
     const assistantMessage = response.choices[0].message.content.trim();
