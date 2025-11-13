@@ -49,21 +49,31 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Changed to true to ensure session is created
+    store: MongoStore, // CRITICAL FIX: Added MongoDB store
     cookie: {
-      secure: true, // REMEMBER TO: Set to true if using HTTPS/deploying
+      secure: true, // HTTPS only
       httpOnly: true, 
-      sameSite: 'none', // REMEMBER TO: change to none if deployed 
-      //maxAge: 1000 * 60 * 60, // 1 hour
-      domain: 'mentalwellnessbot.help',
+      sameSite: 'none', // Allow cross-site cookies for different domains
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      // Removed domain restriction to allow cookies across netlify and render domains
     },
   })
 );
 
 app.get('/history', (req, res) => {
+  console.log('History request - Session ID:', req.sessionID);
+  console.log('Session exists:', !!req.session);
+  console.log('Conversation exists:', !!req.session?.conversation);
+  console.log('Conversation length:', req.session?.conversation?.length || 0);
+  
   // Check if a session exists and has a conversation
   if (req.session && req.session.conversation) {
-    res.json({ conversation: req.session.conversation });
+    // Filter out system messages - only send user and assistant messages
+    const filteredConversation = req.session.conversation.filter(
+      (msg) => msg.role !== 'system'
+    );
+    res.json({ conversation: filteredConversation });
   } else {
     res.json({ conversation: [] }); 
   }
@@ -86,6 +96,9 @@ function isSelfHarmContent(message) {
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
   console.log('Received message from user:', userMessage);
+  console.log('Chat request - Session ID:', req.sessionID);
+  console.log('Session exists:', !!req.session);
+  console.log('Conversation exists before processing:', !!req.session?.conversation);
 
   // if (isSelfHarmContent(userMessage)) {
   //   res.json({
@@ -145,6 +158,13 @@ Remember: Not every response needs to be sympathetic - focus on being genuinely 
     req.session.conversation.push({ role: 'user', content: userMessage });
     req.session.conversation.push({ role: 'assistant', content: safeResponse });
   
+    // Save session to MongoDB
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+      }
+    });
+  
     return res.json({ reply: safeResponse });
   }
   
@@ -162,7 +182,16 @@ Remember: Not every response needs to be sympathetic - focus on being genuinely 
     console.log('Assistant response:', assistantMessage);
     req.session.conversation.push({ role: 'assistant', content: assistantMessage });
 
-    res.json({ reply: assistantMessage });
+    // Save session to MongoDB
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ 
+          reply: 'There was an issue saving your conversation. Please try again.' 
+        });
+      }
+      res.json({ reply: assistantMessage });
+    });
   } catch (error) {
     console.error('Error communicating with OpenAI API:', error);
     res
