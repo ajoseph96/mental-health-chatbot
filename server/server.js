@@ -22,17 +22,17 @@ const app = express();
 
 await connectDB();
 
+// CORS must be first! Before any routes
+app.use(cors({
+  origin: ['https://mental-health-chatbot-project.netlify.app', 'http://localhost:5173', 'https://mentalwellnessbot.help'],
+  credentials: true, 
+}));
+
+app.use(express.json());
+
 app.get('/', (req, res) => {
   res.send('Welcome to the Mental Health Chatbot API!');
 });
-
-app.use( cors({
-  origin: ['https://mental-health-chatbot-project.netlify.app', 'http://localhost:5173', 'https://mentalwellnessbot.help'],
-  credentials: true, 
-  })
-);
-
-app.use(express.json());
 
 //app.use(express.static(path.join(__dirname, 'public')));
 
@@ -108,10 +108,12 @@ function isSelfHarmContent(message) {
 
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
+  console.log('\n=== CHAT REQUEST ===');
   console.log('Received message from user:', userMessage);
-  console.log('Chat request - Session ID:', req.sessionID);
+  console.log('Session ID:', req.sessionID);
   console.log('Session exists:', !!req.session);
   console.log('Conversation exists before processing:', !!req.session?.conversation);
+  console.log('Conversation length before:', req.session?.conversation?.length || 0);
 
   // if (isSelfHarmContent(userMessage)) {
   //   res.json({
@@ -122,6 +124,7 @@ app.post('/chat', async (req, res) => {
   // }
 
   if (!req.session.conversation) {
+    console.log('🆕 Creating new conversation (first message in session)');
     req.session.conversation = [
       {
         role: 'system',
@@ -159,6 +162,8 @@ Remember: Not every response needs to be sympathetic - focus on being genuinely 
   `,
       },
     ];
+  } else {
+    console.log('♻️  Using existing conversation from session');
   }
   
   if (isSelfHarmContent(userMessage)) {
@@ -182,6 +187,11 @@ Remember: Not every response needs to be sympathetic - focus on being genuinely 
   }
   
   req.session.conversation.push({ role: 'user', content: userMessage });
+  console.log('Conversation length after adding user message:', req.session.conversation.length);
+  console.log('Full conversation being sent to OpenAI:');
+  req.session.conversation.forEach((msg, idx) => {
+    console.log(`  ${idx}. [${msg.role}] ${msg.content.substring(0, 50)}...`);
+  });
 
   try {
     const response = await openai.chat.completions.create({
@@ -191,17 +201,21 @@ Remember: Not every response needs to be sympathetic - focus on being genuinely 
     });
 
     const assistantMessage = response.choices[0].message.content.trim();
-    console.log('Assistant response:', assistantMessage);
+    console.log('Assistant response:', assistantMessage.substring(0, 100) + '...');
     req.session.conversation.push({ role: 'assistant', content: assistantMessage });
+    console.log('Conversation length after assistant response:', req.session.conversation.length);
 
     // Save session to MongoDB
     req.session.save((err) => {
       if (err) {
-        console.error('Session save error:', err);
+        console.error('❌ Session save error:', err);
         return res.status(500).json({ 
           reply: 'There was an issue saving your conversation. Please try again.' 
         });
       }
+      console.log('✅ Session saved successfully to MongoDB');
+      console.log('Final conversation length:', req.session.conversation.length);
+      console.log('=== END CHAT REQUEST ===\n');
       res.json({ reply: assistantMessage });
     });
   } catch (error) {
