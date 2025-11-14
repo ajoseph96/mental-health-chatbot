@@ -37,8 +37,10 @@ app.use(express.json());
 //app.use(express.static(path.join(__dirname, 'public')));
 
 const MongoStore = connectMongo.create({
-  client: client, 
+  client: client,
+  dbName: 'chatbot', // Explicitly specify database name
   collectionName: 'sessions',
+  touchAfter: 24 * 3600, // Lazy session update (update once per 24 hours)
 });
 
 const openai = new OpenAI({
@@ -52,14 +54,25 @@ app.use(
     saveUninitialized: true, // Changed to true to ensure session is created
     store: MongoStore, // CRITICAL FIX: Added MongoDB store
     cookie: {
-      secure: true, // HTTPS only
+      secure: process.env.NODE_ENV === 'production', // HTTPS in production, HTTP in development
       httpOnly: true, 
-      sameSite: 'none', // Allow cross-site cookies for different domains
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       // Removed domain restriction to allow cookies across netlify and render domains
     },
   })
 );
+
+// Debug endpoint to check session info
+app.get('/debug-session', (req, res) => {
+  res.json({
+    sessionID: req.sessionID,
+    sessionExists: !!req.session,
+    conversationExists: !!req.session?.conversation,
+    conversationLength: req.session?.conversation?.length || 0,
+    cookie: req.session?.cookie,
+  });
+});
 
 app.get('/history', (req, res) => {
   console.log('History request - Session ID:', req.sessionID);
@@ -172,9 +185,8 @@ Remember: Not every response needs to be sympathetic - focus on being genuinely 
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-5', 
-      messages:
-        req.session.conversation,
+      model: 'gpt-4o-mini', // Fixed: gpt-5 doesn't exist. Using gpt-4o-mini (fast, affordable, good quality)
+      messages: req.session.conversation,
       temperature: 0.8,
     });
 
