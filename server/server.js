@@ -20,6 +20,9 @@ const __filename = fileURLToPath(import.meta.url);
 
 const app = express();
 
+// Trust first proxy - CRITICAL for Render/Heroku/etc
+app.set('trust proxy', 1);
+
 await connectDB();
 
 // CORS must be first! Before any routes
@@ -43,6 +46,9 @@ const MongoStore = connectMongo.create({
   touchAfter: 24 * 3600, // Lazy session update (update once per 24 hours)
 });
 
+// Log when MongoStore is ready
+console.log('✅ MongoStore configured for session storage');
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -62,6 +68,25 @@ app.use(
     },
   })
 );
+
+// Log all requests with session info
+app.use((req, res, next) => {
+  console.log(`\n📨 ${req.method} ${req.path}`);
+  console.log(`   Session ID: ${req.sessionID}`);
+  console.log(`   Has session: ${!!req.session}`);
+  console.log(`   Cookie header received: ${req.headers.cookie || 'NONE ❌ (This is the problem!)'}`);
+  
+  // Log response cookies being set
+  const originalSetHeader = res.setHeader.bind(res);
+  res.setHeader = function(name, value) {
+    if (name.toLowerCase() === 'set-cookie') {
+      console.log(`   🍪 Setting cookie: ${value}`);
+    }
+    return originalSetHeader(name, value);
+  };
+  
+  next();
+});
 
 // Debug endpoint to check session info
 app.get('/debug-session', (req, res) => {
